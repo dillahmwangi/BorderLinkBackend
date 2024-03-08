@@ -20,24 +20,24 @@ const  getDocument =async (req,res)=>{
 
 const uploadDocument = async(req,res)=> {
     try{
-        const {name,file}=req.body;
+        const {name, document}=req.body;
         
-        const size = file.length;
+        const size =document.length;
 
         const type = mimeTypes.lookup(name);
 
-        const document = new Document({
+        const file = new Document({
             name : name ,
             file: file,
             type: type,
             size: size,
             user: req.body.userId
         })
-        await document.save()
+        await file.save()
         res.status(201).json({"message":`File has been uploaded successfully`});
 
     } catch(e){
-        res.status(400).json({"message":"Failed to upload document"});
+        res.status(400).json({"message":"Failed to upload document", error: e} );
     }
 
 }
