@@ -11,22 +11,22 @@ const authController = require('../Controllers/authController')
 // User registration
 router.post('/register', async (req, res) => {
     try {
-    const { username, password,email, phone,country} = req.body;
+    const { userName, password,email, phone,country, idNo} = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ username, password: hashedPassword, email,phone, country });
+    const user = new User({ userName, password: hashedPassword, email,phone, country, idNo });
 
     await user.save();
     res.status(201).json({ message: 'User registered successfully' });
     } catch (error) {
-    res.status(500).json({ error: 'Registration failed' });
+      res.status(500).json({ error: 'Registration failed'+ error});
     }
     });
 
     // User login
  router.post('/login', async (req, res) => {
     try {
-    const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    const { userName, password } = req.body;
+    const user = await User.findOne({ userName:userName });
     if (!user) {
     return res.status(401).json({ error: 'Authentication failed' });
     }
