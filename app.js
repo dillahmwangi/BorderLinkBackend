@@ -3,7 +3,14 @@ const app = express();
 const docRoute = require('./src/Routes/docRoute');
 const authRoutes = require('./src/Routes/auth');
 const protectedRoute = require('./src/Routes/protectedRoute');
+const cors = require("cors");
+
+
+
+
 app.use(express.json());
+app.use(cors());
+
 app.use('/auth', authRoutes);
 app.use('/protected', protectedRoute);
 app.use('/doc', docRoute);
