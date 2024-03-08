@@ -59,6 +59,46 @@ exports.resetPassword = async (req,res,next) =>{
        sendTokenResponse(user,200,res,id);
 
      }
+     exports.user_logout = (req, res, next) => {
+      if (req.session) {
+        req.session.destroy(function(err) {
+          if(err) {
+            res.status(500).json({error: err});
+            return next(err);
+          } else {
+            return res.redirect('/');
+          }
+        });
+      }
+    };
+  
+    exports.userProfile = async (req, res, next) => {
+  
+      //Destructing id from the req.params
+      const { id } = req.params;
+  
+      try {
+          //verifying if the user exist in the database
+          const verifyUser = await userModel.findOne({ userId: id })
+          if (!verifyUser) {
+              return res.status(403).json({
+                  message: "user not found",
+                  success: false,
+              })
+          } else {
+              return res.status(200).json({
+                  messgae: verifyUser,
+                  success: true
+              })
+          }
+      }
+      catch (error) {
+          return res.status(401).json({
+              sucess: false,
+              message: error.message,
+          })
+      }
+  };
 
      
 
