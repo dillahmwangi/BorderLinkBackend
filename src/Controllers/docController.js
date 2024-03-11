@@ -20,18 +20,20 @@ const  getDocument =async (req,res)=>{
 
 const uploadDocument = async(req,res)=> {
     try{
-        const {name, document}=req.body;
+        const {name, user }=req.body;
+        const docImage = req.file.path;
+        console.log("name: ", name, "\n document image: ", docImage)
         
-        const size =document.length;
+        const size =docImage?.length;
 
         const type = mimeTypes.lookup(name);
 
         const file = new Document({
-            name : name ,
-            file: file,
+            filename: name,
+            documentImage: docImage,
             type: type,
             size: size,
-            user: req.body.userId
+            user: user
         })
         await file.save()
         res.status(201).json({"message":`File has been uploaded successfully`});
