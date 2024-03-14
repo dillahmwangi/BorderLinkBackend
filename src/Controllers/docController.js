@@ -20,6 +20,7 @@ const  getDocument =async (req,res)=>{
 
 const uploadDocument = async(req,res)=> {
     try{
+        console.log("req body: ", req.file)
         const {name, user }=req.body;
         const docImage = req.file.path;
         console.log("name: ", name, "\n document image: ", docImage)
