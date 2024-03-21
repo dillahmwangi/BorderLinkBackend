@@ -1,25 +1,40 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
- userName: { type: String, unique: true, required: true },
- password: { type: String, required: true },
- email: {type:String,unique:true,required:true},
- phone:{type:Number,unique:true,required:true},
- country:{type:String,required:true},
- idNo: {type:String,unique:true,required:true},
+    username: { 
+        type: String, 
+        required: [true, "Please enter username"],
+        min: 6,
+        max: 255,
+    },
+    password: { 
+        type: String, 
+        required: true 
+    },
+    email: {
+        type: String,
+        required: [true,"email field is required"],
+        unique: true,
+        lowercase: true,
 
- });
+    },
 
- //hash password token
- userSchema.methods.getResetPasswordToken = function () {
+    phone: { 
+        type: Number, 
+        unique: true, 
+        required: [true,"Phone Number field is required"]
+    },
+    country: { 
+        type: String, 
+        required: [true,"Country field is required"]
+    },
+    idNo: { 
+        type: String, 
+        unique: true, 
+        required: [true,"ID Number field is required"]
+    }
+},
+    { timestamps: true}
+);
 
-    const resetToken = crypto.randomBytes(20).toString('hex');
-
-    this.resetPasswordToken = crypto.createHash('sha512').update(resetToken).digest('hex');
-
-    //set expire
-    this.resetPasswordExpire = Date.now() + 10  * 60 * 1000;
-    return resetToken;
-};
-  
 module.exports = mongoose.model('User', userSchema);
