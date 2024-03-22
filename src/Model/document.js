@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const documentSchema = new mongoose.Schema({
 user: {
@@ -19,4 +19,4 @@ user: {
  //hash password token
 
    
-module.exports = mongoose.model('document', documentSchema);
+export default mongoose.model('document', documentSchema);

@@ -1,6 +1,6 @@
-const express = require('express');
+import  express from 'express';
 const router = express.Router();
-const multer = require('multer');
+import multer from 'multer';
 
 const storage = multer.diskStorage({
     destination: function(req, file, cb){
@@ -26,18 +26,18 @@ const upload = multer({
 });
 
 
-const  docController  = require('../Controllers/docController'); 
+import  { uploadDocument, deleteDocument, getDocumentsByID, getDocument } from '../Controllers/docController.js'; 
 
 // Route to upload a document
-router.post('/',upload.single("documentImage"), docController.uploadDocument);
+router.post('/',upload.single("documentImage"), uploadDocument);
 
 // Route to delete a document by ID
-router.delete('/documents/:id', docController.deleteDocument);
+router.delete('/documents/:id', deleteDocument);
 
 // Route to get a document by ID
-router.get('/documents/:id', docController.getDocumentsByID);
+router.get('/documents/:id', getDocumentsByID);
 
 // Route to get all documents for a user
-router.get('/documents/user/:userId', docController.getDocument);
+router.get('/documents/user/:userId', getDocument);
 
-module.exports = router;
+export default router;

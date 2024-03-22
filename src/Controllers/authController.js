@@ -1,8 +1,8 @@
-const User = require('../Model/user'); 
-const bcrypt = require('bcryptjs'); 
-const otpGenerator = require('otp-generator'); 
-const nodemailer = require('nodemailer'); 
-const jwt = require('jsonwebtoken');
+import User from'../Model/user.js'; 
+import bcrypt from'bcryptjs'; 
+import otpGenerator from'otp-generator'; 
+import nodemailer from'nodemailer'; 
+import jwt from'jsonwebtoken';
 
 
 const register = async (req, res) => {
@@ -124,7 +124,7 @@ const logout = (req, res) => {
 
 
 
-module.exports={register, forgotPassword, login, resetPassword, logout};
+export {register, forgotPassword, login, resetPassword, logout};
 
 
 

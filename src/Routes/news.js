@@ -1,7 +1,7 @@
-const express = require('express');
+import  express from 'express';
 const router = express.Router();
 
-const NewsAPI = require('newsapi');
+import NewsAPI from 'newsapi';
 const newsapi = new NewsAPI('fd3949e9fc8d439f8d810573dc948437');
 
 router.get('/', (req, res) =>{
@@ -15,4 +15,4 @@ router.get('/', (req, res) =>{
       }).catch((err) => res.json({error: "err"}));
 })
 
-module.exports = router;
+export default router;

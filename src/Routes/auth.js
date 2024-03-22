@@ -1,18 +1,18 @@
 
-const express = require('express');
+import  express from 'express';
 const router = express.Router();
-const authController = require('../Controllers/authController')
-const jwt = require('jsonwebtoken');
-const User = require('../Model/user');
+import {register, forgotPassword, login, resetPassword, logout} from'../Controllers/authController.js'
+import jwt from'jsonwebtoken';
+import User from '../Model/user.js';
 
 
 
 // User registration
-router.post('/register', authController.register)
-router.post('/login', authController.login)
-router.post('/logout', authController.logout)
-router.post('/forgotPassword', authController.forgotPassword);
-router.put('/resetPassword', authController.resetPassword);
+router.post('/register', register)
+router.post('/login', login)
+router.post('/logout', logout)
+router.post('/forgotPassword', forgotPassword);
+router.put('/resetPassword', resetPassword);
 
 
 const verifyToken = (req, res, next) => {
@@ -61,4 +61,4 @@ router.get('/profile', verifyToken, async (req, res) => {
 });
 
      
-module.exports = router;
+export default router;

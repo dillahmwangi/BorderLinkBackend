@@ -1,7 +1,8 @@
-const mongoose = require('mongoose');
-require('dotenv').config();
+import  mongoose from 'mongoose';
+import dotenv from 'dotenv';
+dotenv.config()
 
-exports.connect = async () => {
+const connect = async () => {
     // connect to DB
     mongoose.set('strictQuery', false);
     const mongoOptions = {
@@ -13,3 +14,5 @@ exports.connect = async () => {
     const conn = mongoose.connection;
     conn.on('error', console.error.bind(console, 'connection error:'));
 };
+
+export default connect
