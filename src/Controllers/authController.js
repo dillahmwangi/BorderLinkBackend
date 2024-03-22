@@ -1,104 +1,142 @@
-const User = require('../Model/user');
+const User = require('../Model/user'); 
+const bcrypt = require('bcryptjs'); 
+const otpGenerator = require('otp-generator'); 
+const nodemailer = require('nodemailer'); 
+const jwt = require('jsonwebtoken');
 
 
-exports.forgotPassword = async (req, res,next) => {
+const register = async (req, res) => {
+  try {
+      const emailExist = await User.findOne({ email: req.body.email });
+      if (emailExist) return res.status(400).json({ message: "Email Already Exist" });
 
-    
-    const user = await User.findOne({email: req.body.email});
+      const salt = await bcrypt.genSalt(10);
+      const hashPassword = await bcrypt.hash(req.body.password, salt);
 
-    if(!user){
-     res.status(400).json({msg:'No account with this email found'})  ;
+      const user = new User({
+          ...req.body,
+          password: hashPassword,
+      });
 
-    }
-    const resetToken = user?.getResetPasswordToken();
-
-    await user.save({validateBeforeSave:false})
-
-    //create reset url
-
-    const reserUrl = `${req.protocol}://${req.get('host')}/resetPassword/${resetToken}`
-
-    const message = `You are receiving this email because you(or someone else) has requested to reset password.`
-
-    try {
-        await sendEmail({
-        email: user.email,
-        subject: 'Password reset token',
-        message
-        })
-        res.status(200).json({ success: true, data:'Email sent' });
-        } catch (error) {
-        console.log(err);
-        user.getResetPasswordToken = undefined;
-        user.resetPasswordExpire = undefined;
-        await user.save({ validateBeforeSave: false })
-        return next(new ErrorResponse('Email could not be sent', 500))
-        }   
+      await user.save();
+      res.status(201).json({ message: 'User registered successfully' });
+  } catch (err) {
+      res.status(500).json({ message: err.message });
+  }
 }
-//Reset Password
-exports.resetPassword = async (req,res,next) =>{
-    //get token
-    const resetPasswordToken= crypto
-     .createHash('sha512')
-     .update(req.params.resetToken)
-     .digest('hex')
 
-     const user = await User.findOne({
-        resetPasswordToken,resetPasswwordExpire: {$gt:Date.now()}
-     });
-     if(!user){
-        return next(new ErrorResponse('Invalid token',400));
-     }
-     //set new password
-       user.password = req.body.password;
-       user.resetPasswordToken = undefined;
-       usser.resetPasswwordExpire = undefined;
-       await user.save();
+const login = async (req, res) => {
+  try {
+      // checking if email exists
+      
+      const user = await User.findOne({ email: req.body.email });
+      if (!user) return res.status(400).json({ message: "Incorrect Email or Password" });
 
-       const id = user.getId();
-       sendTokenResponse(user,200,res,id);
+      // verifying password
+      const validPassword = await bcrypt.compare(req.body.password, user.password);
+      if (!validPassword) return res.status(400).json({ message: "Incorrect Email or Password" });
 
-     }
-     exports.user_logout = (req, res, next) => {
-      if (req.session) {
-        req.session.destroy(function(err) {
-          if(err) {
-            res.status(500).json({error: err});
-            return next(err);
-          } else {
-            return res.redirect('/');
-          }
-        });
-      }
-    };
-  
-    exports.userProfile = async (req, res, next) => {
-  
-      //Destructing id from the req.params
-      const { id } = req.params;
-  
-      try {
-          //verifying if the user exist in the database
-          const verifyUser = await userModel.findOne({ userId: id })
-          if (!verifyUser) {
-              return res.status(403).json({
-                  message: "user not found",
-                  success: false,
-              })
-          } else {
-              return res.status(200).json({
-                  messgae: verifyUser,
-                  success: true
-              })
-          }
-      }
-      catch (error) {
-          return res.status(401).json({
-              sucess: false,
-              message: error.message,
-          })
-      }
-  };
+      // create token
+      const token = jwt.sign({ user_id: user._id }, process.env.TOKEN_SECRET, {
+          expiresIn: "5h"
+      });
+      res.header('Authorization', `Bearer ${token}`).json({ token: token, user:user });
+  } catch (err) {
+      res.status(500).json({ message: err.message });
+  }
+}
+
+
+const forgotPassword = async(req, res) => {
+  const {email} = req.body
+  const user = await User.findOne({email})
+  if (!user) return res.status(400).json({message: "User not found"})
+
+
+  //generete OTP
+  const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, digits:true });
+
+  user.resetPasswordToken = otp
+  user.resetPasswordExpires = Date.now() + 3600000; // Token expires in 1 hour
+
+  //send OTP to user's email
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: "",
+      pass: ""
+    }
+  })
+
+  const mailOptions = {
+    from: '',
+    to: email,
+    subject: "Password Reset OTP",
+    text: `Your OTP for password reset is: ${otp}`
+  }
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    if(error){
+      res.status(500).json({message: "Error sending OTP"})
+    } else {
+      res.status(200).json({message: "OTP sent successfully"})
+    }
+  })
+}
+
+
+const resetPassword = async(req, res) =>{
+  const {otp, newPassword } = req.body;
+  const user = await User.findOne({ resetPasswordToken: otp, resetPasswordExpires: { $gt: Date.now() } });
+  if (!user) return res.status(400).json({ message: "Invalid or expired token" });
+
+
+   // Validate OTP (you may need to store OTP in the database)
+  if (user) {
+    // Update password
+    const salt = await bcrypt.genSalt(10);
+    const hashPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashPassword;
+    await user.save();
+
+    res.status(200).json({ message: "Password updated successfully" });
+  } else {
+      res.status(400).json({ message: "Invalid OTP" });
+  }
+
+}
+
+
+
+const logout = (req, res) => {
+  try {
+      const authHeader = req.headers["authorization"];
+      if (!authHeader) return res.status(401).json({ message: "Unauthorized" });
+
+      // Token manipulation should be handled differently.
+      res.clearCookie("token").send({ message: "Successfully logged out" });
+  } catch (err) {
+      res.status(500).json({ message: err.message });
+  }
+};
+
+
+
+
+
+module.exports={register, forgotPassword, login, resetPassword, logout};
+
+
+
+
+
+
+
+
+
+
+
+
 
      
 
