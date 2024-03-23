@@ -47,42 +47,48 @@ const login = async (req, res) => {
 }
 
 
-const forgotPassword = async(req, res) => {
-  const {email} = req.body
-  const user = await User.findOne({email})
-  if (!user) return res.status(400).json({message: "User not found"})
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).json({ message: "User not found" });
 
+    // Generate OTP
+    const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, digits: true });
 
-  //generete OTP
-  const otp = otpGenerator.generate(6, { upperCaseAlphabets: false, specialChars: false, digits:true });
+    // Update user document with resetPasswordToken and resetPasswordExpires
+    user.resetPasswordToken = otp;
+    user.resetPasswordExpires = Date.now() + 3600000; // Token expires in 1 hour
+    await user.save();
 
-  user.resetPasswordToken = otp
-  user.resetPasswordExpires = Date.now() + 3600000; // Token expires in 1 hour
+    // Send OTP to user's email
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.SMTP_EMAIL,
+        pass: process.env.SMTP_PASSWORD
+      }
+    });
 
-  //send OTP to user's email
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: "",
-      pass: ""
-    }
-  })
+    const mailOptions = {
+      from: process.env.SMTP_EMAIL,
+      to: email,
+      subject: "Password Reset OTP",
+      text: `Your OTP for password reset is: ${otp}`
+    };
 
-  const mailOptions = {
-    from: '',
-    to: email,
-    subject: "Password Reset OTP",
-    text: `Your OTP for password reset is: ${otp}`
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        res.status(500).json({ message: "Error sending OTP" });
+      } else {
+        res.status(200).json({ message: "OTP sent successfully" });
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
+};
 
-  transporter.sendMail(mailOptions, (error, info) => {
-    if(error){
-      res.status(500).json({message: "Error sending OTP"})
-    } else {
-      res.status(200).json({message: "OTP sent successfully"})
-    }
-  })
-}
 
 
 const resetPassword = async(req, res) =>{
