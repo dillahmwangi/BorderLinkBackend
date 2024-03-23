@@ -32,7 +32,10 @@ const userSchema = new mongoose.Schema({
         type: String, 
         unique: true, 
         required: [true,"ID Number field is required"]
-    }
+    },
+    resetPasswordToken: String, 
+    resetPasswordExpires: Date
+
 },
     { timestamps: true}
 );
