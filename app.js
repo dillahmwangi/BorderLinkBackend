@@ -20,6 +20,10 @@ app.use('/doc', docRoute);
 app.use('/news', newsRoutes)
 app.use('/currency', currenciesRoutes)
 
+app.get('/', (req, res) =>{
+    res.send("Hello Dillah its working")
+})
+
 const PORT = process.env.PORT || 4000;
 import  connect from './src/Config/database.js';
 dotenv.config()
