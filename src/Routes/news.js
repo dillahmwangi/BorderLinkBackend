@@ -2,7 +2,7 @@ import  express from 'express';
 const router = express.Router();
 
 import NewsAPI from 'newsapi';
-const newsapi = new NewsAPI('fd3949e9fc8d439f8d810573dc948437');
+const newsapi = new NewsAPI(process.env.NEWSAPI);
 
 router.get('/', (req, res) =>{
     newsapi.v2.topHeadlines({
