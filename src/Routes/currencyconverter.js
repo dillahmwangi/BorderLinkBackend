@@ -3,7 +3,7 @@ const router = express.Router();
 import Freecurrencyapi from '@everapi/freecurrencyapi-js';
 
 
-router.get('/', (req, res) => {
+router.post('/', (req, res) => {
     const { from, to } = req.body
     const freecurrencyapi = new Freecurrencyapi(process.env.CURRENCY_API);
     freecurrencyapi.latest({
