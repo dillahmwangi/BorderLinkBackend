@@ -1,40 +1,50 @@
 import Document from '../Model/document.js';
-import  mimeTypes from 'mime-types';
+import { v2 as cloudinary } from 'cloudinary';
 
-const getDocument = async (req, res) => {
+cloudinary.config({
+    cloud_name:process.env.CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_KEY,
+    api_secret:process.env.CLOUDINARY_SECRET
+});
+
+
+
+const uploadDocument = async (req, res) => {
     try {
-        const userId = req.params.userId;
-        const documents = await Document.find({ user: userId });
+        console.log("req.body: ", req.body)
+        console.log("req.file.path: ", req.file.path)
+      const { name } = req.body;
+  
+      // Upload image to Cloudinary
+      const result = await cloudinary.uploader.upload(req.file.path);
+      console.log("result: ", result)
+  
+      // Save Cloudinary URL to database
+      const file = new Document({
+        filename: name,
+        documentImage: result.secure_url, 
+        type: result.format, 
+        size: result.bytes, 
+        user: req.userId
+      });
+  
+      await file.save();
+      res.status(201).json({ "message": `File has been uploaded successfully` });
+
+    } catch (e) {
+      res.status(400).json({ "message": "Failed to upload document", error: e });
+    }
+};
+  
+
+const getDocuments = async (req, res) => {
+    try {
+        console.log("req.userId", req.userId)
+        const documents = await Document.find({ user: req.userId });
         res.json(documents);
     } catch (err) {
         console.error("Error in getting document", err);
         return res.status(500).json({ "message": "Unable to retrieve documents" });
-    }
-};
-
-const uploadDocument = async(req,res)=> {
-    try{
-        const {name, user }=req.body;
-        console.log("req body: ", req.body)
-        console.log("file path: ", req.file.path)
-        const docImage = req.file.path;
-        console.log("name: ", name, "\n document image: ", docImage);
-
-        const size = docImage?.length;
-        const type = mimeTypes.lookup(name);
-
-        const file = new Document({
-            filename: name,
-            documentImage: docImage,
-            type: type,
-            size: size,
-            user: user
-        });
-
-        await file.save();
-        res.status(201).json({ "message": `File has been uploaded successfully` });
-    } catch (e) {
-        res.status(400).json({ "message": "Failed to upload document", error: e });
     }
 };
 
@@ -62,4 +72,4 @@ const getDocumentsByID = async (req, res) => {
     }
 };
 
-export { uploadDocument, deleteDocument, getDocumentsByID, getDocument };
+export { uploadDocument, deleteDocument, getDocumentsByID, getDocuments };
