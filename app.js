@@ -1,34 +1,49 @@
-import  express from 'express';
-const app = express();
+import express from 'express';
+import path from 'path';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { URL } from 'url';
+import connect from './src/Config/database.js';
+
+// Import routes
 import docRoute from './src/Routes/docRoute.js';
 import authRoutes from './src/Routes/auth.js';
 import protectedRoute from './src/Routes/protectedRoute.js';
-import newsRoutes from './src/Routes/news.js'
-import cors from "cors";
-import currenciesRoutes from "./src/Routes/currencyconverter.js"
-import dotenv from 'dotenv';
+import newsRoutes from './src/Routes/news.js';
+import currenciesRoutes from './src/Routes/currencyconverter.js';
+import smsRoutes from './src/Routes/sms.js';
 
+// Get current filename and directory
+const __filename = new URL(import.meta.url).pathname;
+const __dirname = path.dirname(__filename);
 
+// Create Express app
+const app = express();
 
+// Serve static files from the uploads directory
+app.use(express.static(path.join(__dirname, 'uploads')));
 
+// Middleware
 app.use(express.json());
 app.use(cors());
 
+// Routes
 app.use('/auth', authRoutes);
 app.use('/protected', protectedRoute);
 app.use('/doc', docRoute);
-app.use('/news', newsRoutes)
-app.use('/currency', currenciesRoutes)
+app.use('/news', newsRoutes);
+app.use('/currency', currenciesRoutes);
+app.use('/sms', smsRoutes);
 
-app.get('/', (req, res) =>{
-    res.send("Hello Dillah its working")
-})
+// Default route
+app.get('/', (req, res) => {
+  res.send("Hello Dillah its working");
+});
 
+// Start server
 const PORT = process.env.PORT || 4000;
-import  connect from './src/Config/database.js';
-dotenv.config()
-app.listen(PORT, async() => {
-console.log(`Server is running on port ${PORT}`);
-await connect();
-
+dotenv.config();
+app.listen(PORT, async () => {
+  console.log(`Server is running on port ${PORT}`);
+  await connect();
 });
