@@ -16,23 +16,35 @@ router.put('/resetPassword', resetPassword);
 
 
 export const verifyToken = (req, res, next) => {
-  const token_with_bearer = req.headers['authorization'];
-  const token = token_with_bearer.split(' ')[1]
-
-  if (!token) {
-      console.log("am token: ", token)
-      return res.status(401).json({ message: 'Authorization token not provided' });
-  }
-
-  jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
+    const token_with_bearer = req.headers['authorization'];
+    
+    // Check if the authorization header exists
+    if (!token_with_bearer) {
+      // If there's no token provided, continue to the next middleware
+      return next();
+    }
+  
+    // Split the authorization header to get the token parts
+    const token_parts = token_with_bearer.split(' ');
+  
+    // Check if the token is in the correct format
+    if (token_parts.length !== 2 || token_parts[0] !== 'Bearer') {
+      return res.status(401).json({ message: 'Invalid authorization header' });
+    }
+  
+    const token = token_parts[1];
+  
+    // Verify the token
+    jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
       if (err) {
-          return res.status(401).json({ message: 'Invalid token' });
+        return res.status(401).json({ message: 'Invalid token' });
       }
       req.userId = decoded.user_id; // Attach user ID to request object
-      console.log(req.userId)
       next();
-  });
-};
+    });
+  };
+  
+  
 
 // GET user profile
 router.get('/profile', verifyToken, async (req, res) => {

@@ -51,7 +51,8 @@ router.delete('/documents/:id', deleteDocument);
 // Route to get all documents for a user
 router.get('/', verifyToken, async (req, res) => {
   let { userId } = req.query
-  console.log("userid: ", userId)
+  console.log("userids: ", userId)
+
 
   if (!userId) {
     // If user ID is not provided in query params (i.e., accessed via QR code scan)
