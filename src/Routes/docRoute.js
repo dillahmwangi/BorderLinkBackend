@@ -2,8 +2,10 @@ import express from 'express';
 const router = express.Router();
 import multer from 'multer';
 import cloudinary from 'cloudinary';
-import { uploadDocument, deleteDocument, getDocumentsByID, getDocuments } from '../Controllers/docController.js';
+import { uploadDocument, deleteDocument } from '../Controllers/docController.js';
 import { verifyToken } from './auth.js';
+import Document from '../Model/document.js';
+
 
 console.log("name: ", process.env.CLOUD_NAME)
 // Cloudinary configuration
@@ -47,6 +49,24 @@ router.delete('/documents/:id', deleteDocument);
 // // Route to get a document by ID
 
 // Route to get all documents for a user
-router.get('/documents/user', verifyToken,  getDocuments);
+router.get('/', verifyToken, async (req, res) => {
+  let { userId } = req.query
+  console.log("userid: ", userId)
+
+  if (!userId) {
+    // If user ID is not provided in query params (i.e., accessed via QR code scan)
+    // Use the authenticated user's ID from the token
+    userId = req.userId;
+  }
+
+  try {
+    // Fetch documents associated with the user ID
+    const documents = await Document.find({ user: userId });
+    res.json(documents);
+  } catch (err) {
+    console.error('Error in getting documents', err);
+    res.status(500).json({ message: 'Unable to retrieve documents' });
+  }
+});
 
 export default router;

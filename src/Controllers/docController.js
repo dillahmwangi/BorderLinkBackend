@@ -37,16 +37,6 @@ const uploadDocument = async (req, res) => {
 };
   
 
-const getDocuments = async (req, res) => {
-    try {
-        console.log("req.userId", req.userId)
-        const documents = await Document.find({ user: req.userId });
-        res.json(documents);
-    } catch (err) {
-        console.error("Error in getting document", err);
-        return res.status(500).json({ "message": "Unable to retrieve documents" });
-    }
-};
 
 const deleteDocument = async (req, res) => {
     try {
@@ -72,4 +62,4 @@ const getDocumentsByID = async (req, res) => {
     }
 };
 
-export { uploadDocument, deleteDocument, getDocumentsByID, getDocuments };
+export { uploadDocument, deleteDocument, getDocumentsByID };
