@@ -15,7 +15,7 @@ router.post('/forgotPassword', forgotPassword);
 router.put('/resetPassword', resetPassword);
 
 
-const verifyToken = (req, res, next) => {
+export const verifyToken = (req, res, next) => {
   const token_with_bearer = req.headers['authorization'];
   const token = token_with_bearer.split(' ')[1]
 
@@ -29,6 +29,7 @@ const verifyToken = (req, res, next) => {
           return res.status(401).json({ message: 'Invalid token' });
       }
       req.userId = decoded.user_id; // Attach user ID to request object
+      console.log(req.userId)
       next();
   });
 };
