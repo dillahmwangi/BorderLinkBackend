@@ -12,28 +12,26 @@ const africastalking = AfricasTalking({
 
 
 router.post('/incoming-messages', async (req, res) => {
-    const response = await chatGptPrompt(req.body.text)
-    sendSMS(req.body.from, response||'something went wrong')
-    res.sendStatus(200);
-  });
-
-
+  const response = await chatGptPrompt(req.body.text);
+  await sendSMS(req.body.from, response || 'Something went wrong');
+  res.sendStatus(200);
+});
 
 async function sendSMS(number, message) {
-    // TODO: Send message
-    console.log("number: ", number)
-    try {
-    const result= await africastalking.SMS.send({
-        to: [number], 
-        message: message,
-        from: process.env.SENDER_ID
+  console.log("number: ", number);
+  try {
+    const result = await africastalking.SMS.send({
+      to: [number], 
+      message: message,
+      from: '53089'
     });
     console.log(result);
-    return true // success
-    } catch(ex) {
+    return true;
+  } catch(ex) {
     console.error(ex);
-    return false // failed
-    } 
-};
+    return false;
+  } 
+}
 
-export default router
+export default router;
+
