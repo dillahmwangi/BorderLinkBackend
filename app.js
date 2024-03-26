@@ -4,6 +4,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import { URL } from 'url';
 import connect from './src/Config/database.js';
+import bodyParser from 'body-parser';
 
 // Import routes
 import docRoute from './src/Routes/docRoute.js';
@@ -24,7 +25,10 @@ const app = express();
 app.use(express.static(path.join(__dirname, 'uploads')));
 
 // Middleware
+app.use(bodyParser.json());
 app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 app.use(cors());
 
 // Routes
