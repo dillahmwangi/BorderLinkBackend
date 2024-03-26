@@ -12,6 +12,7 @@ const africastalking = AfricasTalking({
 
 
 router.post('/incoming-messages', async (req, res) => {
+  console.log("phone number: ", req.body.from)
     const response = await chatGptPrompt(req.body.text)
     console.log(response)
     sendSMS(req.body.from, response||'something went wrong')
@@ -21,6 +22,7 @@ router.post('/incoming-messages', async (req, res) => {
 
 async function sendSMS(number, message) {
     // TODO: Send message
+    console.log("number: ", number)
     try {
     const result= await africastalking.SMS.send({
         to: [number], 
