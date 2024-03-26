@@ -15,34 +15,62 @@ router.post('/forgotPassword', forgotPassword);
 router.put('/resetPassword', resetPassword);
 
 
+// export const verifyToken = (req, res, next) => {
+//     const token_with_bearer = req.headers['authorization'];
+    
+//     // Check if the authorization header exists
+//     if (!token_with_bearer) {
+//       // If there's no token provided, continue to the next middleware
+//       return next();
+//     }
+  
+//     // Split the authorization header to get the token parts
+//     const token_parts = token_with_bearer.split(' ');
+  
+//     // Check if the token is in the correct format
+//     if (token_parts.length !== 2 || token_parts[0] !== 'Bearer') {
+//       return res.status(401).json({ message: 'Invalid authorization header' });
+//     }
+  
+//     const token = token_parts[1];
+  
+//     // Verify the token
+//     jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
+//       if (err) {
+//         return res.status(401).json({ message: 'Invalid token' });
+//       }
+//       req.userId = decoded.user_id; // Attach user ID to request object
+//       next();
+//     });
+//   };
+
 export const verifyToken = (req, res, next) => {
     const token_with_bearer = req.headers['authorization'];
-    
-    // Check if the authorization header exists
+  
     if (!token_with_bearer) {
       // If there's no token provided, continue to the next middleware
       return next();
     }
   
-    // Split the authorization header to get the token parts
     const token_parts = token_with_bearer.split(' ');
   
-    // Check if the token is in the correct format
     if (token_parts.length !== 2 || token_parts[0] !== 'Bearer') {
       return res.status(401).json({ message: 'Invalid authorization header' });
     }
   
     const token = token_parts[1];
   
-    // Verify the token
     jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded) => {
       if (err) {
         return res.status(401).json({ message: 'Invalid token' });
       }
-      req.userId = decoded.user_id; // Attach user ID to request object
+      // Attach user ID to request object
+      req.userId = decoded.user_id;
+      console.log(req.userId); // Make sure user ID is logged
       next();
     });
   };
+  
   
   
 

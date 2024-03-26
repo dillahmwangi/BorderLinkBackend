@@ -50,14 +50,19 @@ router.delete('/documents/:id', deleteDocument);
 
 // Route to get all documents for a user
 router.get('/', verifyToken, async (req, res) => {
-  let { userId } = req.query
-  console.log("userids: ", userId)
-
+  let { userId } = req.query;
+  console.log("req.userId124: ", req.userId)
 
   if (!userId) {
     // If user ID is not provided in query params (i.e., accessed via QR code scan)
     // Use the authenticated user's ID from the token
+    console.log("req.userId: ", req.userId)
     userId = req.userId;
+
+    // If the user ID is still null, return an empty array of documents
+    if (!userId) {
+      return res.json([]); // or return res.status(404).json({ message: 'User ID not found' });
+    }
   }
 
   try {
@@ -69,5 +74,6 @@ router.get('/', verifyToken, async (req, res) => {
     res.status(500).json({ message: 'Unable to retrieve documents' });
   }
 });
+
 
 export default router;
