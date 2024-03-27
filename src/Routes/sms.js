@@ -1,6 +1,6 @@
 import express  from 'express'
 import AfricasTalking  from 'africastalking'
-import { chatGptPrompt} from "../chatgpt/index.js"
+import { geminiPrompt } from "../chatgpt/index.js"
 
 const router = express.Router()
 import 'dotenv/config'
@@ -13,7 +13,7 @@ const africastalking = AfricasTalking({
 
 router.post('/incoming-messages', async (req, res) => {
   console.log("incomming message")
-  const response = await chatGptPrompt(req.body.text);
+  const response = await geminiPrompt(req.body.text);
   await sendSMS(req.body.from, response || 'Something went wrong');
   res.sendStatus(200);
 });
@@ -33,6 +33,19 @@ async function sendSMS(number, message) {
     return false;
   } 
 }
+
+router.post("/contact", async (req, res) => {
+  try{
+    const result = await africastalking.SMS.send({
+      to: [number], 
+      message: message,
+    });
+    return true
+  }catch(err){
+    console.error(ex);
+    return false;
+  }
+})
 
 export default router;
 

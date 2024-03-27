@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@everapi/freecurrencyapi-js": "^1.0.1",
+    "@google/generative-ai": "^0.3.1",
     "africastalking": "^0.6.6",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
