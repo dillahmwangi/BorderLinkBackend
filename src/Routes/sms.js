@@ -5,10 +5,7 @@ import { geminiPrompt } from "../chatgpt/index.js"
 const router = express.Router()
 import 'dotenv/config'
 
-const africastalking = AfricasTalking({
-  apiKey: process.env.API_KEY, 
-  username: process.env.AT_USERNAME
-});
+
 
 
 router.post('/incoming-messages', async (req, res) => {
@@ -21,6 +18,10 @@ router.post('/incoming-messages', async (req, res) => {
 async function sendSMS(number, message) {
   console.log("number: ", number);
   try {
+    const africastalking = AfricasTalking({
+      apiKey: process.env.API_KEYSANDBOX, 
+      username: process.env.AT_USERNAMESANDBOX
+    });
     const result = await africastalking.SMS.send({
       to: [number], 
       message: message,
@@ -34,17 +35,21 @@ async function sendSMS(number, message) {
   } 
 }
 
-router.post("/contact", async (req, res) => {
-  try{
-    const result = await africastalking.SMS.send({
-      to: [number], 
+
+
+
+router.post('/contact', async(req, res) => {
+  const africastalking = AfricasTalking({
+    apiKey: process.env.APIKEY, 
+    username: process.env.AT_USERNAME
+  });
+  const { phoneNumber, message } = req.body
+  const result = await africastalking.SMS.send({
+      to: phoneNumber,
       message: message,
-    });
-    return true
-  }catch(err){
-    console.error(ex);
-    return false;
-  }
+  })
+   
+  res.send(result)
 })
 
 export default router;
