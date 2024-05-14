@@ -9,8 +9,10 @@ import 'dotenv/config'
 
 
 router.post('/incoming-messages', async (req, res) => {
+  console.log("req: ", req.body.text)
   console.log("incomming message")
   const response = await geminiPrompt(req.body.text);
+  console.log("response: ", response)
   await sendSMS(req.body.from, response || 'Something went wrong');
   res.sendStatus(200);
 });
@@ -25,7 +27,7 @@ async function sendSMS(number, message) {
     const result = await africastalking.SMS.send({
       to: [number], 
       message: message,
-      from: '53089'
+      from: '17295'
     });
     console.log(result);
     return true;
