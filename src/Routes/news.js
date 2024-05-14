@@ -7,7 +7,7 @@ const newsapi = new NewsAPI('fd3949e9fc8d439f8d810573dc948437');
 
 router.get('/', (req, res) =>{
     newsapi.v2.topHeadlines({
-        q: 'political',
+        // q: 'countries',
         category: 'general',
         language: 'en',
         country: 'us'
